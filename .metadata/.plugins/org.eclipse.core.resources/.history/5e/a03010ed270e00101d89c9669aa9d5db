@@ -1,0 +1,152 @@
+package no.hvl.dat107;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.Persistence;
+import java.time.LocalDate;
+import java.util.List;
+
+public class AnsattDAO {
+
+    private EntityManagerFactory emf = Persistence.createEntityManagerFactory("your_persistence_unit");
+
+    // Finn en ansatt basert på ID
+    public Ansatt finnAnsattMedId(int id) {
+        EntityManager em = emf.createEntityManager();
+        Ansatt ansatt = null;
+        try {
+            ansatt = em.find(Ansatt.class, id);
+        } finally {
+            em.close();
+        }
+        return ansatt;
+    }
+
+    // Finn en ansatt basert på brukernavn (initialer)
+    public Ansatt finnAnsattMedBrukernavn(String brukernavn) {
+        EntityManager em = emf.createEntityManager();
+        Ansatt ansatt = null;
+        try {
+            ansatt = em.createQuery(
+                    "SELECT a FROM Ansatt a WHERE a.brukernavn = :brukernavn", Ansatt.class)
+                    .setParameter("brukernavn", brukernavn)
+                    .getSingleResult();
+        } catch (Exception e) {
+            System.out.println("Fant ingen ansatt med brukernavn: " + brukernavn);
+        } finally {
+            em.close();
+        }
+        return ansatt;
+    }
+
+    // Hent alle ansatte
+    public List<Ansatt> hentAlleAnsatte() {
+        EntityManager em = emf.createEntityManager();
+        List<Ansatt> ansatte = null;
+        try {
+            ansatte = em.createQuery("SELECT a FROM Ansatt a", Ansatt.class).getResultList();
+        } finally {
+            em.close();
+        }
+        return ansatte;
+    }
+
+    // Oppdater en ansatts stilling og/eller lønn
+    public void oppdaterAnsatt(int id, String stilling, int lønn) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+            tx.begin();
+            Ansatt ansatt = em.find(Ansatt.class, id);
+            if (ansatt != null) {
+                if (stilling != null) ansatt.setStilling(stilling);
+                if (lønn > 0) ansatt.setManedslonn(lønn);
+                em.merge(ansatt);
+                System.out.println("Oppdatert ansatt: " + ansatt.getFornavn() + " " + ansatt.getEtternavn());
+            } else {
+                System.out.println("Fant ingen ansatt med ID: " + id);
+            }
+            tx.commit();
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            e.printStackTrace();
+        } finally {
+            em.close();
+        }
+    }
+
+    // Legg til en ny ansatt
+    public void leggTilAnsatt(String brukernavn, String fornavn, String etternavn, String dato, String stilling, int lønn, int avdelingId) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+            tx.begin();
+
+            LocalDate ansettelsesdato = LocalDate.parse(dato);
+            Avdeling avdeling = em.find(Avdeling.class, avdelingId);
+            if (avdeling == null) {
+                System.out.println("Ugyldig avdeling ID.");
+                return;
+            }
+
+            Ansatt nyAnsatt = new Ansatt(brukernavn, fornavn, etternavn, ansettelsesdato, stilling, lønn, avdeling);
+            em.persist(nyAnsatt);
+
+            tx.commit();
+            System.out.println("Ny ansatt lagt til: " + fornavn + " " + etternavn);
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            e.printStackTrace();
+        } finally {
+            em.close();
+        }
+    }
+
+    public void endreAvdeling(int ansattId, int avdelingId) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+            tx.begin();
+
+            // Hent ansatt basert på ansattId
+            Ansatt ansatt = em.find(Ansatt.class, ansattId);
+            
+            if (ansatt == null) {
+                System.out.println("Fant ingen ansatt med ID: " + ansattId);
+                return;
+            }
+
+            // Sjekk om den ansatte er sjef for en avdeling
+            Avdeling gammelAvdeling = ansatt.getAvdeling();
+            if (gammelAvdeling != null && gammelAvdeling.getSjef() != null && gammelAvdeling.getSjef().equals(ansatt)) {
+                System.out.println("Den ansatte er sjef for avdelingen og kan ikke bytte avdeling.");
+                return;
+            }
+
+            // Hent ny avdeling basert på avdelingId
+            Avdeling nyAvdeling = em.find(Avdeling.class, avdelingId);
+            if (nyAvdeling == null) {
+                System.out.println("Fant ingen avdeling med ID: " + avdelingId);
+                return;
+            }
+
+            // Endre avdelingen til den ansatte
+            ansatt.setAvdeling(nyAvdeling);
+
+            // Lagre endringene i databasen
+            em.merge(ansatt);
+            tx.commit();
+            System.out.println("Avdelingen for ansatt " + ansatt.getFornavn() + " " + ansatt.getEtternavn() + " er oppdatert.");
+
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            e.printStackTrace();
+        } finally {
+            em.close();
+        }
+    }
+}

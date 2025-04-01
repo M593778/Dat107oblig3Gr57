@@ -1,0 +1,54 @@
+package no.hvl.dat107;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.Persistence;
+
+public class AnsattDAO {
+
+    private EntityManagerFactory emf = Persistence.createEntityManagerFactory("your_persistence_unit");
+
+    public void endreAvdeling(int ansattId, int nyAvdelingId) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        
+        try {
+            tx.begin();
+            
+            // Finn ansatt
+            Ansatt ansatt = em.find(Ansatt.class, ansattId);
+            if (ansatt == null) {
+                System.out.println("Ansatt med ID " + ansattId + " ble ikke funnet.");
+                return;
+            }
+
+            // Sjekk om ansatt er sjef for en avdeling
+            Avdeling nåværendeAvdeling = ansatt.getAvdeling();
+            if (nåværendeAvdeling != null && nåværendeAvdeling.getSjef() != null
+                    && nåværendeAvdeling.getSjef().getId() == ansattId) {
+                System.out.println("Kan ikke endre avdeling! Ansatt er sjef.");
+                return;
+            }
+
+            // Finn ny avdeling
+            Avdeling nyAvdeling = em.find(Avdeling.class, nyAvdelingId);
+            if (nyAvdeling == null) {
+                System.out.println("Ny avdeling med ID " + nyAvdelingId + " ble ikke funnet.");
+                return;
+            }
+
+            // Oppdater avdeling
+            ansatt.setAvdeling(nyAvdeling);
+            em.merge(ansatt);
+            
+            tx.commit();
+            System.out.println("Ansatt " + ansatt.getFornavn() + " har byttet til avdeling " + nyAvdeling.getNavn());
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            e.printStackTrace();
+        } finally {
+            em.close();
+        }
+    }
+}

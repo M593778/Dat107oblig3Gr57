@@ -1,0 +1,77 @@
+package no.hvl.dat107;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
+import jakarta.persistence.TypedQuery;
+import java.util.List;
+import java.time.LocalDate;
+
+public class AnsattDAO {
+
+    private EntityManagerFactory emf;
+    private EntityManager em;
+
+    public Ansatt finnAnsattMedId(int id) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(Ansatt.class, id);
+        } finally {
+            em.close();
+        }
+    }
+
+    public Ansatt finnAnsattMedBrukernavn(String brukernavn) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.createQuery("SELECT a FROM Ansatt a WHERE a.brukernavn = :brukernavn", Ansatt.class)
+                     .setParameter("brukernavn", brukernavn)
+                     .getSingleResult();
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<Ansatt> hentAlleAnsatte() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.createQuery("SELECT a FROM Ansatt a", Ansatt.class).getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public void oppdaterAnsatt(int id, String nyStilling, int nyLon) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            Ansatt ansatt = em.find(Ansatt.class, id);
+            if (ansatt != null) {
+                ansatt.setStilling(nyStilling);
+                ansatt.setManedslonn(nyLon);
+            }
+            em.getTransaction().commit();
+        } finally {
+            em.close();
+        }
+    }
+
+    public void leggTilAnsatt(String brukernavn, String fornavn, String etternavn, LocalDate dato, String stilling, int lon, int avdelingId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            Avdeling avdeling = em.find(Avdeling.class, avdelingId);
+            if (avdeling != null) {
+                Ansatt nyAnsatt = new Ansatt(brukernavn, fornavn, etternavn, dato, stilling, lon, avdeling);
+                em.persist(nyAnsatt);
+            }
+            em.getTransaction().commit();
+        } finally {
+            em.close();
+        }
+    }
+    public void close() {
+        em.close();
+        emf.close();
+    }
+}

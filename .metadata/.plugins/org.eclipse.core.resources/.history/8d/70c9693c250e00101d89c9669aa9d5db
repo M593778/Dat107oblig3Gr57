@@ -1,0 +1,118 @@
+package no.hvl.dat107;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.Persistence;
+import java.time.LocalDate;
+import java.util.List;
+
+public class AnsattDAO {
+    private EntityManagerFactory emf = Persistence.createEntityManagerFactory("ansattPersistenceUnit");
+
+    public Ansatt finnAnsattMedId(int id) {
+        EntityManager em = emf.createEntityManager();
+        Ansatt ansatt = em.find(Ansatt.class, id);
+        em.close();
+        return ansatt;
+    }
+
+    public Ansatt finnAnsattMedBrukernavn(String brukernavn) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.createQuery("SELECT a FROM Ansatt a WHERE a.brukernavn = :brukernavn", Ansatt.class)
+                    .setParameter("brukernavn", brukernavn)
+                    .getSingleResult();
+        } catch (Exception e) {
+            return null;
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<Ansatt> hentAlleAnsatte() {
+        EntityManager em = emf.createEntityManager();
+        List<Ansatt> ansatte = em.createQuery("SELECT a FROM Ansatt a", Ansatt.class).getResultList();
+        em.close();
+        return ansatte;
+    }
+
+    public List<Ansatt> hentAnsatteIAvdeling(int avdelingId) {
+        EntityManager em = emf.createEntityManager();
+        List<Ansatt> ansatte = em.createQuery("SELECT a FROM Ansatt a WHERE a.avdeling.id = :avdelingId", Ansatt.class)
+                .setParameter("avdelingId", avdelingId)
+                .getResultList();
+        em.close();
+        return ansatte;
+    }
+
+    public void oppdaterAnsatt(int id, String nyStilling, int nyLønn) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        
+        try {
+            tx.begin();
+            Ansatt ansatt = em.find(Ansatt.class, id);
+            if (ansatt != null) {
+                if (!nyStilling.isEmpty()) ansatt.setStilling(nyStilling);
+                if (nyLønn > 0) ansatt.setManedslonn(nyLønn);
+                em.merge(ansatt);
+            }
+            tx.commit();
+        } finally {
+            if (tx.isActive()) tx.rollback();
+            em.close();
+        }
+    }
+
+    public void leggTilAnsatt(String brukernavn, String fornavn, String etternavn, LocalDate ansettelsesdato, String stilling, int lønn, int avdelingId) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        
+        try {
+            tx.begin();
+            Avdeling avdeling = em.find(Avdeling.class, avdelingId);
+            if (avdeling == null) {
+                System.out.println("Avdeling ikke funnet.");
+                return;
+            }
+            
+            Ansatt nyAnsatt = new Ansatt(brukernavn, fornavn, etternavn, ansettelsesdato, stilling, lønn, avdeling);
+            em.persist(nyAnsatt);
+            tx.commit();
+        } finally {
+            if (tx.isActive()) tx.rollback();
+            em.close();
+        }
+    }
+
+    public void oppdaterAvdeling(int ansattId, int nyAvdelingId) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        
+        try {
+            tx.begin();
+            Ansatt ansatt = em.find(Ansatt.class, ansattId);
+            Avdeling nyAvdeling = em.find(Avdeling.class, nyAvdelingId);
+            
+            if (ansatt == null || nyAvdeling == null) {
+                System.out.println("Feil: Ansatt eller avdeling ikke funnet.");
+                return;
+            }
+            
+            // Forhindre at sjefen flyttes til en annen avdeling
+            if (ansatt.getId() == ansatt.getAvdeling().getSjef().getId()) {
+                System.out.println("Kan ikke flytte en sjef til en annen avdeling.");
+                return;
+            }
+            
+            ansatt.setAvdeling(nyAvdeling);
+            em.merge(ansatt);
+            tx.commit();
+        } finally {
+            if (tx.isActive()) tx.rollback();
+            em.close();
+        }
+    }
+}
+

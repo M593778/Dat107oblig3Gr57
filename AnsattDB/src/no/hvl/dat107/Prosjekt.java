@@ -1,0 +1,40 @@
+package no.hvl.dat107;
+
+import jakarta.persistence.*;
+import java.util.List;
+
+@Entity
+@Table(schema = "oblig3", name = "Prosjekt")
+public class Prosjekt {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    private String navn;
+    private String beskrivelse;
+
+    @OneToMany(mappedBy = "prosjekt", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Prosjektdeltagelse> deltagere;
+
+    public Prosjekt() {}
+
+    public Prosjekt(String navn, String beskrivelse) {
+        this.navn = navn;
+        this.beskrivelse = beskrivelse;
+    }
+
+    public int getId() { return id; }
+    public String getNavn() { return navn; }
+    public String getBeskrivelse() { return beskrivelse; }
+    public List<Prosjektdeltagelse> getDeltagere() { return deltagere; }
+
+    @Override
+    public String toString() {
+        return "Prosjekt{" +
+                "id=" + id +
+                ", navn='" + navn + '\'' +
+                ", beskrivelse='" + beskrivelse + '\'' +
+                '}';
+    }
+}

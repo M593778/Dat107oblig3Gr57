@@ -1,0 +1,24 @@
+INDEX VERSION 1.134+C:\Users\Martin\Documents\GitHub\Dat107oblig3Gr57\.metadata\.plugins\org.eclipse.jdt.core
+1087459676.index
+3090762128.index
+2836248043.index
+3869039980.index
+1790292438.index
+3657118492.index
+1865797976.index
+3049808159.index
+1741064548.index
+824052320.index
+2555846510.index
+278443562.index
+3031173935.index
+2522086901.index
+552104363.index
+3730255727.index
+3751654475.index
+1471051840.index
+684445118.index
+1775777776.index
+1846657434.index
+2068473522.index
+2304781760.index

@@ -1,0 +1,42 @@
+package no.hvl.dat107;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
+
+
+public class Main {
+
+    public static void main(String[] args) {
+        EntityManagerFactory emf = null;
+        EntityManager em = null;
+
+        try {
+            // Lag EntityManagerFactory og EntityManager
+            emf = Persistence.createEntityManagerFactory("ansattPersistenceUnit");
+            em = emf.createEntityManager();
+
+            // Hent en ansatt med ID 1 fra databasen
+            Ansatt ansatt = em.find(Ansatt.class, 1L);
+
+            if (ansatt != null) {
+                // Skriv ut informasjonen om ansatt
+                ansatt.skrivUt();
+            } else {
+                System.out.println("Ingen ansatt funnet med ID 1");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (em != null) {
+                em.close();
+            }
+            if (emf != null) {
+                emf.close();
+            }
+        }
+    }
+}
+
+

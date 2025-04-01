@@ -1,0 +1,146 @@
+package no.hvl.dat107;
+
+import java.util.List;
+import java.util.Scanner;
+
+public class Main {
+
+    private static AnsattDAO ansattDAO = new AnsattDAO();
+    private static Scanner scanner = new Scanner(System.in);
+
+    public static void main(String[] args) {
+        while (true) {
+            visMeny();
+            int valg = scanner.nextInt();
+            scanner.nextLine(); // For å lese newline etter int input
+
+            switch (valg) {
+                case 1:
+                    finnAnsattMedId();
+                    break;
+                case 2:
+                    finnAnsattMedBrukernavn();
+                    break;
+                case 3:
+                    listAlleAnsatte();
+                    break;
+                case 4:
+                    oppdaterAnsatt();
+                    break;
+                case 5:
+                    leggInnNyAnsatt();
+                    break;
+                case 6:
+                    System.out.println("Avslutter programmet...");
+                    ansattDAO.close();
+                    System.exit(0);
+                    break;
+                default:
+                    System.out.println("Ugyldig valg, prøv igjen.");
+            }
+        }
+    }
+
+    private static void visMeny() {
+        System.out.println("\n--- Meny ---");
+        System.out.println("1. Søke etter ansatt på ansatt-id");
+        System.out.println("2. Søke etter ansatt på brukernavn (initialer)");
+        System.out.println("3. Liste alle ansatte");
+        System.out.println("4. Oppdatere ansattens stilling og/eller lønn");
+        System.out.println("5. Legg til ny ansatt");
+        System.out.println("6. Avslutt");
+        System.out.print("Velg et alternativ: ");
+    }
+
+    private static void finnAnsattMedId() {
+        System.out.print("Skriv inn ansattens ID: ");
+        int id = scanner.nextInt();
+        scanner.nextLine();
+        Ansatt ansatt = ansattDAO.finnAnsattMedId(id);
+        if (ansatt != null) {
+            ansatt.skrivUt();
+        } else {
+            System.out.println("Ingen ansatt funnet med ID " + id);
+        }
+    }
+
+    private static void finnAnsattMedBrukernavn() {
+        System.out.print("Skriv inn initialer (brukernavn): ");
+        String initialer = scanner.nextLine();
+        List<Ansatt> ansatte = ansattDAO.finnAnsattMedBrukernavn(initialer);
+        if (ansatte.isEmpty()) {
+            System.out.println("Ingen ansatt funnet med initialene " + initialer);
+        } else {
+            for (Ansatt ansatt : ansatte) {
+                ansatt.skrivUt();
+            }
+        }
+    }
+
+    private static void listAlleAnsatte() {
+        List<Ansatt> ansatte = ansattDAO.hentAlleAnsatte();
+        if (ansatte.isEmpty()) {
+            System.out.println("Ingen ansatte finnes.");
+        } else {
+            for (Ansatt ansatt : ansatte) {
+                ansatt.skrivUt();
+            }
+        }
+    }
+
+    private static void oppdaterAnsatt() {
+        System.out.print("Skriv inn ansattens ID for oppdatering: ");
+        int id = scanner.nextInt();
+        scanner.nextLine();
+        Ansatt ansatt = ansattDAO.finnAnsattMedId(id);
+
+        if (ansatt != null) {
+            System.out.print("Skriv inn ny stilling: ");
+            String stilling = scanner.nextLine();
+            ansatt.setStilling(stilling);
+
+            System.out.print("Skriv inn ny månedslønn: ");
+            double manedslonn = scanner.nextDouble();
+            ansatt.setManedslonn(manedslonn);
+
+            ansattDAO.oppdaterAnsatt(ansatt);
+            System.out.println("Ansattens data ble oppdatert.");
+        } else {
+            System.out.println("Ingen ansatt funnet med ID " + id);
+        }
+    }
+
+    private static void leggInnNyAnsatt() {
+        System.out.print("Skriv inn brukernavn: ");
+        String brukernavn = scanner.nextLine();
+
+        System.out.print("Skriv inn fornavn: ");
+        String fornavn = scanner.nextLine();
+
+        System.out.print("Skriv inn etternavn: ");
+        String etternavn = scanner.nextLine();
+
+        System.out.print("Skriv inn ansettelsesdato (yyyy-mm-dd): ");
+        String datoStr = scanner.nextLine();
+
+        System.out.print("Skriv inn stilling: ");
+        String stilling = scanner.nextLine();
+
+        System.out.print("Skriv inn månedslønn: ");
+        double manedslonn = scanner.nextDouble();
+        scanner.nextLine(); // For å lese newline etter double
+
+        // Opprett ny Ansatt objekt
+        Ansatt nyAnsatt = new Ansatt();
+        nyAnsatt.setBrukernavn(brukernavn);
+        nyAnsatt.setFornavn(fornavn);
+        nyAnsatt.setEtternavn(etternavn);
+        nyAnsatt.setDatoAnsettelse(java.sql.Date.valueOf(datoStr));
+        nyAnsatt.setStilling(stilling);
+        nyAnsatt.setManedslonn(manedslonn);
+
+        // Legg til ansatt i databasen
+        ansattDAO.leggInnNyAnsatt(nyAnsatt);
+        System.out.println("Ny ansatt ble lagt til.");
+    }
+}

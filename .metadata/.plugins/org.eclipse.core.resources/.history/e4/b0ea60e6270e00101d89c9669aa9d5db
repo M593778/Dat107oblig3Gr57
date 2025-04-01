@@ -1,0 +1,59 @@
+package no.hvl.dat107;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.Persistence;
+import java.util.List;
+
+public class AvdelingDAO {
+    private EntityManagerFactory emf = Persistence.createEntityManagerFactory("oblig3");
+
+    public Avdeling finnAvdelingMedId(int id) {
+        EntityManager em = emf.createEntityManager();
+        Avdeling avdeling = em.find(Avdeling.class, id);
+        em.close();
+        return avdeling;
+    }
+
+    public void leggTilAvdeling(String navn, int sjefId) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        
+        try {
+            tx.begin();
+            Ansatt sjef = em.find(Ansatt.class, sjefId);
+            if (sjef == null) {
+                System.out.println("Ansatt med ID " + sjefId + " finnes ikke.");
+                return;
+            }
+            
+            Avdeling nyAvdeling = new Avdeling(navn, sjef);
+            em.persist(nyAvdeling);
+
+            // Oppdater sjefens avdeling
+            sjef.setAvdeling(nyAvdeling);
+            em.merge(sjef);
+            
+            tx.commit();
+        } finally {
+            if (tx.isActive()) tx.rollback();
+            em.close();
+        }
+    }
+
+    public List<Avdeling> hentAlleAvdelinger() {
+        EntityManager em = emf.createEntityManager();
+        List<Avdeling> avdelinger = em.createQuery("SELECT a FROM Avdeling a", Avdeling.class).getResultList();
+        em.close();
+        return avdelinger;
+    }
+
+	public void listAnsatteIAvdeling(int id) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+}
+
+

@@ -1,0 +1,112 @@
+package no.hvl.dat107;
+
+import jakarta.persistence.*;
+import java.util.Date;
+
+@Entity
+@Table(name = "ansatt", schema = "oblig3")
+public class Ansatt {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ansatt_id")  // Mapp kolonnenavn til ansatt_id i databasen
+    private Long ansattId;
+
+    @Column(name = "brukernavn")  // Mapp til riktig kolonne i databasen
+    private String brukernavn;
+
+    @Column(name = "fornavn")  // Mapp til riktig kolonne i databasen
+    private String fornavn;
+
+    @Column(name = "etternavn")  // Mapp til riktig kolonne i databasen
+    private String etternavn;
+
+    @Column(name = "ansettelsesdato")  // Mapp til riktig kolonne i databasen
+    private Date datoAnsettelse;
+
+    @Column(name = "stilling")  // Mapp til riktig kolonne i databasen
+    private String stilling;
+
+    @Column(name = "manedslonn")  // Mapp til riktig kolonne i databasen
+    private Double manedslonn;
+    
+    @ManyToOne
+    @Column(name = "avdeling_id") // Mapp til riktig kolonne i databasen
+    private Avdeling avdeling;
+
+    // Gettere og settere
+    public Long getAnsattId() {
+        return ansattId;
+    }
+
+    public void setAnsattId(Long ansattId) {
+        this.ansattId = ansattId;
+    }
+
+    public String getBrukernavn() {
+        return brukernavn;
+    }
+
+    public void setBrukernavn(String brukernavn) {
+        this.brukernavn = brukernavn;
+    }
+
+    public String getFornavn() {
+        return fornavn;
+    }
+
+    public void setFornavn(String fornavn) {
+        this.fornavn = fornavn;
+    }
+
+    public String getEtternavn() {
+        return etternavn;
+    }
+
+    public void setEtternavn(String etternavn) {
+        this.etternavn = etternavn;
+    }
+
+    public Date getDatoAnsettelse() {
+        return datoAnsettelse;
+    }
+
+    public void setDatoAnsettelse(Date datoAnsettelse) {
+        this.datoAnsettelse = datoAnsettelse;
+    }
+
+    public String getStilling() {
+        return stilling;
+    }
+
+    public void setStilling(String stilling) {
+        this.stilling = stilling;
+    }
+
+    public Double getManedslonn() {
+        return manedslonn;
+    }
+
+    public void setManedslonn(int nyLon) {
+        this.manedslonn = nyLon;
+    }
+    
+    public Avdeling getAvdeling() {
+        return avdeling;
+    }
+
+    public void setAvdeling(Avdeling avdeling) {
+        this.avdeling = avdeling;
+    }
+
+    // Skriv ut informasjon om ansatt
+    public void skrivUt() {
+        System.out.println("Ansatt ID: " + ansattId);
+        System.out.println("Brukernavn: " + brukernavn);
+        System.out.println("Fornavn: " + fornavn);
+        System.out.println("Etternavn: " + etternavn);
+        System.out.println("Ansettelsesdato: " + datoAnsettelse);
+        System.out.println("Stilling: " + stilling);
+        System.out.println("Månedslønn: " + manedslonn);
+    }
+}

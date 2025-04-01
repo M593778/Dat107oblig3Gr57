@@ -1,0 +1,64 @@
+package no.hvl.dat107;
+
+import jakarta.persistence.*;
+import java.time.LocalDate;
+
+@Entity
+@Table(name = "ansatt")
+public class Ansatt {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int ansattId;
+    
+    @Column(nullable = false, unique = true)
+    private String brukernavn;
+    
+    private String fornavn;
+    private String etternavn;
+    private LocalDate ansettelsesdato;
+    private String stilling;
+    private int manedslonn;
+    
+    @ManyToOne
+    @JoinColumn(name = "avdeling_id", nullable = false)
+    private Avdeling avdeling;
+
+    public Ansatt() {}
+    
+    public Ansatt(String brukernavn, String fornavn, String etternavn, LocalDate ansettelsesdato, String stilling, int manedslonn, Avdeling avdeling) {
+        this.brukernavn = brukernavn;
+        this.fornavn = fornavn;
+        this.etternavn = etternavn;
+        this.ansettelsesdato = ansettelsesdato;
+        this.stilling = stilling;
+        this.manedslonn = manedslonn;
+        this.avdeling = avdeling;
+    }
+
+    public int getAnsattId() { return ansattId; }
+    public String getBrukernavn() { return brukernavn; }
+    public String getFornavn() { return fornavn; }
+    public String getEtternavn() { return etternavn; }
+    public LocalDate getAnsettelsesdato() { return ansettelsesdato; }
+    public String getStilling() { return stilling; }
+    public int getManedslonn() { return manedslonn; }
+    public Avdeling getAvdeling() { return avdeling; }
+    
+    public void setStilling(String stilling) { this.stilling = stilling; }
+    public void setManedslonn(int manedslonn) { this.manedslonn = manedslonn; }
+    
+    @Override
+    public String toString() {
+        return "Ansatt{" +
+                "ansattId=" + ansattId +
+                ", brukernavn='" + brukernavn + '\'' +
+                ", fornavn='" + fornavn + '\'' +
+                ", etternavn='" + etternavn + '\'' +
+                ", stilling='" + stilling + '\'' +
+                ", manedslonn=" + manedslonn +
+                ", avdeling=" + avdeling.getNavn() +
+                '}';
+    }
+}
+

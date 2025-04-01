@@ -1,0 +1,57 @@
+package no.hvl.dat107;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+
+import java.util.List;
+
+@Entity
+public class Avdeling {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long avdelingId;
+    private String navn;
+
+    @OneToMany(mappedBy = "avdeling")
+    private List<Ansatt> ansatte;
+
+    private Long sjefId;  // Referanse til sjefen, kan settes senere
+
+    // Gettere og settere
+    public Long getAvdelingId() {
+        return avdelingId;
+    }
+
+    public void setAvdelingId(Long avdelingId) {
+        this.avdelingId = avdelingId;
+    }
+
+    public String getNavn() {
+        return navn;
+    }
+
+    public void setNavn(String navn) {
+        this.navn = navn;
+    }
+
+    public List<Ansatt> getAnsatte() {
+        return ansatte;
+    }
+
+    public void setAnsatte(List<Ansatt> ansatte) {
+        this.ansatte = ansatte;
+    }
+
+    public Long getSjefId() {
+        return sjefId;
+    }
+
+    public void setSjefId(Long sjefId) {
+        this.sjefId = sjefId;
+    }
+}
+

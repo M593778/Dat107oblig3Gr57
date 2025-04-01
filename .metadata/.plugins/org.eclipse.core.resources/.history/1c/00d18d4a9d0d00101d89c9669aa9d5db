@@ -1,0 +1,58 @@
+package no.hvl.dat107;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
+import jakarta.persistence.TypedQuery;
+import java.util.List;
+
+public class AnsattDAO {
+
+    private EntityManagerFactory emf;
+    private EntityManager em;
+
+    public AnsattDAO() {
+        emf = Persistence.createEntityManagerFactory("your_persistence_unit"); // Bruk riktig persistence unit
+        em = emf.createEntityManager();
+    }
+
+    // Metode for å finne ansatt med id
+    public Ansatt finnAnsattMedId(int id) {
+        return em.find(Ansatt.class, id);
+    }
+
+    // Metode for å finne ansatt med brukernavn (f.eks. initialer)
+    public List<Ansatt> finnAnsattMedBrukernavn(String initialer) {
+        String jpql = "SELECT a FROM Ansatt a WHERE a.brukernavn LIKE :initialer";
+        TypedQuery<Ansatt> query = em.createQuery(jpql, Ansatt.class);
+        query.setParameter("initialer", initialer + "%");
+        return query.getResultList();
+    }
+
+    // Metode for å hente ut alle ansatte
+    public List<Ansatt> hentAlleAnsatte() {
+        String jpql = "SELECT a FROM Ansatt a";
+        TypedQuery<Ansatt> query = em.createQuery(jpql, Ansatt.class);
+        return query.getResultList();
+    }
+
+    // Metode for å oppdatere en ansatts stilling og/eller lønn
+    public void oppdaterAnsatt(Ansatt ansatt) {
+        em.getTransaction().begin();
+        em.merge(ansatt);
+        em.getTransaction().commit();
+    }
+
+    // Metode for å legge inn en ny ansatt
+    public void leggInnNyAnsatt(Ansatt ansatt) {
+        em.getTransaction().begin();
+        em.persist(ansatt);
+        em.getTransaction().commit();
+    }
+
+    // Lukk EntityManager og EntityManagerFactory
+    public void close() {
+        em.close();
+        emf.close();
+    }
+}

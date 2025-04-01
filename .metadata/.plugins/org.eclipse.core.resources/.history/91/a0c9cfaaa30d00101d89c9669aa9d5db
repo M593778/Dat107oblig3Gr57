@@ -1,0 +1,20 @@
+package no.hvl.dat107;
+
+public class Test {
+
+    public static void main(String[] args) {
+        AnsattDAO ansattDAO = new AnsattDAO();
+        AvdelingDAO avdelingDAO = new AvdelingDAO();
+
+        // Finn ansatt med id 1
+        Ansatt ansatt = ansattDAO.finnAnsattMedId(1L);
+        ansatt.skrivUt();
+
+        // Finn avdeling med id 1
+        Avdeling avdeling = avdelingDAO.finnAvdelingMedId(1L);
+        System.out.println("Avdelingens navn: " + avdeling.getNavn());
+
+        ansattDAO.close();
+        avdelingDAO.close();
+    }
+}

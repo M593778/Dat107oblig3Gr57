@@ -1,0 +1,78 @@
+package no.hvl.dat107;
+
+import jakarta.persistence.*;
+import java.util.List;
+
+public class ProsjektDAO {
+    private EntityManagerFactory emf = Persistence.createEntityManagerFactory("your_persistence_unit");
+
+    public Prosjekt finnProsjektMedId(int id) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(Prosjekt.class, id);
+        } finally {
+            em.close();
+        }
+    }
+
+    public void leggTilProsjekt(String navn, String beskrivelse) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            Prosjekt prosjekt = new Prosjekt(navn, beskrivelse);
+            em.persist(prosjekt);
+            em.getTransaction().commit();
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<Prosjekt> hentAlleProsjekter() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.createQuery("SELECT p FROM Prosjekt p", Prosjekt.class).getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+
+    // Legger til en ansatt i et prosjekt med en rolle
+    public void leggTilDeltagelse(int ansattId, int prosjektId, String rolle) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+            tx.begin();
+
+            Ansatt ansatt = em.find(Ansatt.class, ansattId);
+            Prosjekt prosjekt = em.find(Prosjekt.class, prosjektId);
+
+            if (ansatt == null || prosjekt == null) {
+                System.out.println("Ugyldig ansatt eller prosjekt.");
+                return;
+            }
+
+            Prosjektdeltagelse deltagelse = new Prosjektdeltagelse(ansatt, prosjekt, rolle, 0);
+            em.persist(deltagelse);
+
+            tx.commit();
+            System.out.println(ansatt.getFornavn() + " er lagt til i prosjektet " + prosjekt.getNavn() + " som " + rolle);
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            e.printStackTrace();
+        } finally {
+            em.close();
+        }
+    }
+
+	public void føreTimer(int ansattId, int prosjektId, int timer) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void visProsjektInfo(int prosjektId) {
+		// TODO Auto-generated method stub
+		
+	}
+}

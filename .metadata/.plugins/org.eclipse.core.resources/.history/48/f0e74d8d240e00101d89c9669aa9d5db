@@ -1,0 +1,98 @@
+package no.hvl.dat107;
+
+import jakarta.persistence.*;
+import java.time.LocalDate;
+
+@Entity
+@Table(schema = "oblig3", name = "ansatt")
+public class Ansatt {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ansatt_id")
+    private int id;
+
+    @Column(nullable = false, unique = true)
+    private String brukernavn;
+    
+    @Column(nullable = false)
+    private String fornavn;
+    
+    @Column(nullable = false)
+    private String etternavn;
+    
+    @Column(nullable = false, name = "ansettelsesdato")
+    private LocalDate ansettelsesdato;
+    
+    @Column(nullable = false)
+    private String stilling;
+    
+    @Column(nullable = false, name = "manedslonn")
+    private int månedslønn;
+    
+    @ManyToOne
+    @JoinColumn(name = "avdeling_id", nullable = false)
+    private Avdeling avdeling;
+
+    public Ansatt() {}
+
+    public Ansatt(String brukernavn, String fornavn, String etternavn, LocalDate ansettelsesdato, String stilling, int månedslønn, Avdeling avdeling) {
+        this.brukernavn = brukernavn;
+        this.fornavn = fornavn;
+        this.etternavn = etternavn;
+        this.ansettelsesdato = ansettelsesdato;
+        this.stilling = stilling;
+        this.månedslønn = månedslønn;
+        this.avdeling = avdeling;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getBrukernavn() {
+        return brukernavn;
+    }
+
+    public String getFornavn() {
+        return fornavn;
+    }
+
+    public String getEtternavn() {
+        return etternavn;
+    }
+
+    public LocalDate getAnsettelsesdato() {
+        return ansettelsesdato;
+    }
+
+    public String getStilling() {
+        return stilling;
+    }
+
+    public int getMånedslønn() {
+        return månedslønn;
+    }
+
+    public Avdeling getAvdeling() {
+        return avdeling;
+    }
+
+    public void setStilling(String stilling) {
+        this.stilling = stilling;
+    }
+
+    public void setMånedslønn(int månedslønn) {
+        this.månedslønn = månedslønn;
+    }
+
+    public void setAvdeling(Avdeling avdeling) {
+        this.avdeling = avdeling;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%d: %s %s (%s) - %s, %d kr, Avdeling: %s", 
+                id, fornavn, etternavn, brukernavn, stilling, månedslønn, avdeling.getNavn());
+    }
+}

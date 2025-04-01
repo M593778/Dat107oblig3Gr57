@@ -1,0 +1,39 @@
+package no.hvl.dat107;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "Prosjektdeltagelse")
+public class Prosjektdeltagelse {
+
+    @Id
+    @ManyToOne
+    @JoinColumn(name = "ansatt_id")
+    private Ansatt ansatt;
+
+    @Id
+    @ManyToOne
+    @JoinColumn(name = "prosjekt_id")
+    private Prosjekt prosjekt;
+
+    private String rolle;
+    private int timer;
+
+    public Prosjektdeltagelse() {}
+
+    public Prosjektdeltagelse(Ansatt ansatt, Prosjekt prosjekt, String rolle) {
+        this.ansatt = ansatt;
+        this.prosjekt = prosjekt;
+        this.rolle = rolle;
+        this.timer = 0;
+    }
+
+    public void leggTilTimer(int antall) {
+        this.timer += antall;
+    }
+
+    @Override
+    public String toString() {
+        return ansatt.getFornavn() + " " + ansatt.getEtternavn() + " - " + rolle + " - " + timer + " timer";
+    }
+}

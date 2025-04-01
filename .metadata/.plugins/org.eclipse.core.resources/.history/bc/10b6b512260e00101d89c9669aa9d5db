@@ -1,0 +1,44 @@
+package no.hvl.dat107;
+
+import jakarta.persistence.*;
+import java.util.List;
+
+public class ProsjektDAO {
+    private EntityManagerFactory emf = Persistence.createEntityManagerFactory("your_persistence_unit");
+
+    public Prosjekt finnProsjektMedId(int id) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(Prosjekt.class, id);
+        } finally {
+            em.close();
+        }
+    }
+
+    public void leggTilProsjekt(String navn, String beskrivelse) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            Prosjekt prosjekt = new Prosjekt(navn, beskrivelse);
+            em.persist(prosjekt);
+            em.getTransaction().commit();
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<Prosjekt> hentAlleProsjekter() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.createQuery("SELECT p FROM Prosjekt p", Prosjekt.class).getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+
+	public void leggTilDeltagelse(int ansattId, int prosjektId, String rolle) {
+		// TODO Auto-generated method stub
+		
+	}
+}
